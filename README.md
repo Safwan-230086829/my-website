@@ -5,11 +5,9 @@
 
 [![Degree](https://img.shields.io/badge/BEng%20%28Hons%29-Aston%20University-AAFF00?style=flat-square)](https://www.aston.ac.uk/)
 
-![Field](https://img.shields.io/badge/Specialism-Embedded%20%26%20Control-070B0F?style=flat-square)
-
 [![Membership](https://img.shields.io/badge/IET-Student%20Member-orange?style=flat-square)](https://www.theiet.org/)
 
-This repository hosts my personal engineering portfolio—built with a high-contrast, cyberpunk-themed command-line aesthetic mirroring real-world telemetry interfaces. It showcases my academic mi[...]
+This repository hosts my personal engineering portfolio—built with a high-contrast, cyberpunk-themed command-line aesthetic mirroring real-world telemetry interfaces. It showcases my academic milestones, hardware schematic pipelines, and embedded software systems design.
 
 ---
 
@@ -27,7 +25,7 @@ Under my academic projects section, users can launch an embedded canvas-based 2D
 
 ### 2. Embedded Arcade Console
 
-Features a functional retro "Snake" mini-game designed inside a Neopixel styled panel to demonstrate canvas loops, simple physics vectors, and keyboard listener state machines in JavaScript.
+Features a functional retro "Snake" mini-game designed inside a Neopixel styled panel as a the main project was about deleoping Mulitplayer snake on arduino
 
 ---
 
