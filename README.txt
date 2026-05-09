@@ -3,7 +3,7 @@
 
 [![Portfolio Status](https://img.shields.io/badge/Portfolio-Live%20Demo-00D4FF?style=flat-square&logo=github)](https://Safwan-230086829.github.io)
 
-[![Degree](https://img.shields.io/badge/BEng%20(Hons)-Aston%20University-AAFF00?style=flat-square)](https://www.aston.ac.uk/)
+[![Degree](https://img.shields.io/badge/BEng%20%28Hons%29-Aston%20University-AAFF00?style=flat-square)](https://www.aston.ac.uk/)
 
 ![Field](https://img.shields.io/badge/Specialism-Embedded%20%26%20Control-070B0F?style=flat-square)
 
