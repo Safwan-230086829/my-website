@@ -534,6 +534,92 @@
   .lightbox.open { display: flex; }
   .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; }
 
+
+  /* ─── SNAKE GAME ──────────────────────────────────────── */
+  .play-btn {
+    margin-top: 8px;
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid var(--lime);
+    color: var(--lime);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: fit-content;
+  }
+  .play-btn:hover { background: var(--lime-dim); }
+
+  .snake-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .snake-overlay.open { display: flex; }
+
+  .snake-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 400px;
+  }
+  .snake-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--lime);
+  }
+  .snake-score-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--text-secondary);
+  }
+  .snake-score {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: var(--lime);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  #snakeCanvas {
+    display: block;
+    image-rendering: pixelated;
+  }
+
+  .snake-msg {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    text-align: center;
+    height: 20px;
+  }
+
+  .snake-close {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .snake-close:hover { color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -712,6 +798,7 @@
       <div class="project-num">02</div>
       <h3 class="project-title">2-Player NeoPixel Snake</h3>
       <p class="project-subtitle">Team Project · Electronic Procurement Lead</p>
+      <button class="play-btn" onclick="openSnake()">▶ Play Snake</button>
       <p class="project-desc">
         A two-player Snake game built on a custom-fabricated NeoPixel
         LED display, driven by an Arduino Mega. I led all electronic procurement —
@@ -827,6 +914,14 @@
       </div>
     </div>
 
+    <!-- Placeholder -->
+    <div class="project-card reveal" style="border: 1px dashed var(--text-muted); background: transparent; opacity: 0.5; align-items: center; justify-content: center; min-height: 280px;">
+      <div style="text-align: center;">
+        <div style="font-size: 32px; color: var(--text-muted); margin-bottom: 12px;">+</div>
+        <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);">More Projects Coming</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -903,6 +998,195 @@
     document.getElementById('lightbox').classList.remove('open');
   }
   document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLightbox(); });
+</script>
+
+
+<!-- SNAKE GAME OVERLAY -->
+<div class="snake-overlay" id="snakeOverlay">
+  <div class="snake-header">
+    <span class="snake-title"><span style="color:#AAFF00">■</span> P1: WASD &nbsp;·&nbsp; <span style="color:#FF6B00">■</span> P2: Arrows</span>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="snake-score-label">Score</span>
+      <span class="snake-score" id="snakeScore"><span style="color:#AAFF00">0</span><span style="color:var(--text-muted);font-size:14px"> vs </span><span style="color:#FF6B00">0</span></span>
+    </div>
+  </div>
+  <canvas id="snakeCanvas" width="400" height="400"></canvas>
+  <div class="snake-msg" id="snakeMsg">Press any arrow key or WASD to start</div>
+  <button class="snake-close" onclick="closeSnake()">✕ Close</button>
+</div>
+
+
+<script>
+// ── 2-Player Snake Game ───────────────────────────────────────────────────
+const GRID = 16;
+const CELL = 400 / GRID;
+const C = {
+  bg:    '#070B0F',
+  grid:  'rgba(0,212,255,0.04)',
+  p1:    '#AAFF00',   p1g: 'rgba(170,255,0,0.6)',
+  p2:    '#FF6B00',   p2g: 'rgba(255,107,0,0.6)',
+  head:  '#FFFFFF',
+  food:  '#00D4FF',   foodg: 'rgba(0,212,255,0.5)',
+  dead1: 'rgba(170,255,0,0.25)',
+  dead2: 'rgba(255,107,0,0.25)',
+};
+
+let canvas, ctx, loop, state, hiScore = 0;
+let s1, s2, d1, nd1, d2, nd2, food, score1, score2, winner;
+
+function openSnake() {
+  document.getElementById('snakeOverlay').classList.add('open');
+  canvas = document.getElementById('snakeCanvas');
+  ctx = canvas.getContext('2d');
+  resetGame();
+  drawFrame();
+  document.addEventListener('keydown', handleKey);
+}
+
+function closeSnake() {
+  document.getElementById('snakeOverlay').classList.remove('open');
+  clearInterval(loop);
+  document.removeEventListener('keydown', handleKey);
+}
+
+function resetGame() {
+  clearInterval(loop);
+  // P1 starts left side moving right, P2 starts right side moving left
+  s1 = [{x:4,y:8},{x:3,y:8},{x:2,y:8}];
+  s2 = [{x:11,y:8},{x:12,y:8},{x:13,y:8}];
+  d1 = {x:1,y:0}; nd1 = {x:1,y:0};
+  d2 = {x:-1,y:0}; nd2 = {x:-1,y:0};
+  score1 = 0; score2 = 0; winner = null;
+  state = 'waiting';
+  updateScores();
+  document.getElementById('snakeMsg').textContent = 'P1: WASD  ·  P2: Arrow Keys  ·  Press any key to start';
+  spawnFood();
+}
+
+function updateScores() {
+  document.getElementById('snakeScore').innerHTML =
+    '<span style="color:#AAFF00">' + score1 + '</span>' +
+    '<span style="color:var(--text-muted);font-size:14px"> vs </span>' +
+    '<span style="color:#FF6B00">' + score2 + '</span>';
+}
+
+function startGame() {
+  state = 'playing';
+  document.getElementById('snakeMsg').textContent = '';
+  loop = setInterval(tick, 120);
+}
+
+function spawnFood() {
+  let pos;
+  const all = [...s1, ...s2];
+  do { pos = {x:Math.floor(Math.random()*GRID), y:Math.floor(Math.random()*GRID)}; }
+  while (all.some(s => s.x===pos.x && s.y===pos.y));
+  food = pos;
+}
+
+function tick() {
+  d1 = nd1; d2 = nd2;
+  const h1 = {x:s1[0].x+d1.x, y:s1[0].y+d1.y};
+  const h2 = {x:s2[0].x+d2.x, y:s2[0].y+d2.y};
+
+  const all1 = [...s1, ...s2];
+  const all2 = [...s2, ...s1];
+
+  const dead1 = h1.x<0||h1.x>=GRID||h1.y<0||h1.y>=GRID || all1.some(s=>s.x===h1.x&&s.y===h1.y);
+  const dead2 = h2.x<0||h2.x>=GRID||h2.y<0||h2.y>=GRID || all2.some(s=>s.x===h2.x&&s.y===h2.y);
+
+  // Head-on collision - both die
+  const headOn = h1.x===h2.x && h1.y===h2.y;
+
+  if (dead1 || dead2 || headOn) {
+    if (headOn || (dead1 && dead2)) winner = 'draw';
+    else if (dead1) winner = 2;
+    else winner = 1;
+    return die();
+  }
+
+  s1.unshift(h1);
+  s2.unshift(h2);
+
+  let ate = false;
+  if (h1.x===food.x && h1.y===food.y) { score1++; ate=true; }
+  else s1.pop();
+  if (h2.x===food.x && h2.y===food.y) { score2++; ate=true; }
+  else s2.pop();
+
+  if (ate) { updateScores(); spawnFood(); }
+  drawFrame();
+}
+
+function die() {
+  clearInterval(loop);
+  state = 'dead';
+  drawFrame();
+  let msg = '';
+  if (winner === 'draw') msg = 'Draw! Both snakes collided!';
+  else if (winner === 1) msg = '🟢 Player 1 wins!  Score: ' + score1 + ' vs ' + score2;
+  else msg = '🟠 Player 2 wins!  Score: ' + score2 + ' vs ' + score1;
+  msg += '  ·  R to restart';
+  document.getElementById('snakeMsg').textContent = msg;
+}
+
+function drawFrame() {
+  ctx.fillStyle = C.bg;
+  ctx.fillRect(0,0,400,400);
+
+  // Grid dots
+  ctx.fillStyle = C.grid;
+  for (let x=0;x<GRID;x++) for(let y=0;y<GRID;y++) {
+    ctx.beginPath(); ctx.arc(x*CELL+CELL/2,y*CELL+CELL/2,1.5,0,Math.PI*2); ctx.fill();
+  }
+
+  // Food
+  const fx=food.x*CELL+CELL/2, fy=food.y*CELL+CELL/2;
+  const fg=ctx.createRadialGradient(fx,fy,0,fx,fy,CELL*0.7);
+  fg.addColorStop(0,C.food); fg.addColorStop(1,'transparent');
+  ctx.fillStyle=fg; ctx.beginPath(); ctx.arc(fx,fy,CELL*0.7,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=C.food; ctx.beginPath(); ctx.arc(fx,fy,CELL*0.28,0,Math.PI*2); ctx.fill();
+
+  // Draw snake helper
+  function drawSnake(snake, col, gCol, deadCol) {
+    const isDead = state==='dead';
+    snake.forEach((s,i) => {
+      const sx=s.x*CELL+CELL/2, sy=s.y*CELL+CELL/2;
+      const isHead = i===0;
+      const g2=ctx.createRadialGradient(sx,sy,0,sx,sy,CELL*0.6);
+      g2.addColorStop(0, isDead ? deadCol : (isHead?'rgba(255,255,255,0.8)':gCol));
+      g2.addColorStop(1,'transparent');
+      ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(sx,sy,CELL*0.6,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = isDead ? deadCol : (isHead?C.head:col);
+      ctx.beginPath(); ctx.arc(sx,sy,CELL*0.38,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  drawSnake(s1, C.p1, C.p1g, C.dead1);
+  drawSnake(s2, C.p2, C.p2g, C.dead2);
+}
+
+function handleKey(e) {
+  if (e.key==='Escape') { closeSnake(); return; }
+  if ((e.key==='r'||e.key==='R') && state==='dead') { resetGame(); drawFrame(); return; }
+
+  if (state==='waiting') startGame();
+
+  const p1keys = { w:{x:0,y:-1},s:{x:0,y:1},a:{x:-1,y:0},d:{x:1,y:0},
+                   W:{x:0,y:-1},S:{x:0,y:1},A:{x:-1,y:0},D:{x:1,y:0} };
+  const p2keys = { ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0} };
+
+  if (p1keys[e.key]) {
+    e.preventDefault();
+    const m=p1keys[e.key];
+    if(m.x!==-d1.x||m.y!==-d1.y) nd1=m;
+  }
+  if (p2keys[e.key]) {
+    e.preventDefault();
+    const m=p2keys[e.key];
+    if(m.x!==-d2.x||m.y!==-d2.y) nd2=m;
+  }
+}
 </script>
 
 </body>
