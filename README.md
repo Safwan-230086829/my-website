@@ -27,7 +27,7 @@ Under my academic projects section, users can launch an embedded canvas-based 2D
 
 ### 2. Embedded Arcade Console
 
-Features a functional retro "Snake" mini-game designed inside a vintage CRT-styled panel to demonstrate canvas loops, simple physics vectors, and keyboard listener state machines in JavaScript.
+Features a functional retro "Snake" mini-game designed inside a Neopixel styled panel to demonstrate canvas loops, simple physics vectors, and keyboard listener state machines in JavaScript.
 
 ---
 
