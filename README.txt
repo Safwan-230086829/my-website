@@ -1,9 +1,9 @@
 # Mohammed Ali Safwan Khan
 ### Electrical & Electronic Engineer
 
-[![Portfolio Status](https://img.shields.io/badge/Portfolio-Live%20Demo-00D4FF?style=flat-square&logo=github)](https://Safwan-230086829.github.io)
-[![Degree](https://img.shields.io/badge/BEng%20(Hons)-Aston%20University-AAFF00?style=flat-square)](https://www.aston.ac.uk/)
-[![Field](https://img.shields.io/badge/Specialism-Embedded%20%26%20Control-070B0F?style=flat-square)]()
+[![Portfolio Status](https://img.shields.io/badge/Portfolio-Live%20Demo-00D4FF?style=flat-square&logo=github)] (https://Safwan-230086829.github.io)
+[![Degree](https://img.shields.io/badge/BEng%20(Hons)-Aston%20University-AAFF00?style=flat-square)]  (https://www.aston.ac.uk/)
+[![Field](https://img.shields.io/badge/Specialism-Embedded%20%26%20Control-070B0F?style=flat-square)]
 [![Membership](https://img.shields.io/badge/IET-Student%20Member-orange?style=flat-square)](https://www.theiet.org/)
 
 This repository hosts my personal engineering portfolio—built with a high-contrast, cyberpunk-themed command-line aesthetic mirroring real-world telemetry interfaces. It showcases my academic milestones, hardware schematic pipelines, and embedded software systems design.
