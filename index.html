@@ -1292,7 +1292,7 @@
         <div>1 Player</div>
         <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">WASD or Arrows</div>
       </button>
-      <button class="mode-btn" onclick="selectMode(2)">
+      <button class="mode-btn" id="mode2Btn" onclick="selectMode(2)">
         <div style="font-size:22px;margin-bottom:6px;">👥</div>
         <div>2 Players</div>
         <div style="font-size:10px;color:var(--text-muted);margin-top:4px;">WASD vs Arrows</div>
@@ -1335,7 +1335,7 @@
     <div class="snake-msg" id="snakeMsg"></div>
     <div style="display:flex;gap:16px;">
       <button class="snake-close" onclick="backToMenu()">← Mode Select</button>
-      <button class="snake-close" id="snakeRestartBtn" style="display:none;" onclick="resetGame();drawFrame();">↺ Restart</button>
+      <button class="snake-close" id="snakeRestartBtn" style="display:none;font-size:15px;padding:10px 24px;border-color:var(--lime);color:var(--lime);" onclick="resetGame();drawFrame();">↺ Restart</button>
       <button class="snake-close" onclick="closeSnake()">✕ Close</button>
     </div>
   </div>
@@ -1366,6 +1366,15 @@ function openSnake() {
   // Show D-pad on touch devices
   if ('ontouchstart' in window) {
     document.getElementById('snakeDpad').style.display = 'flex';
+  }
+  // Disable 2-player on small screens (phones)
+  const btn2 = document.getElementById('mode2Btn');
+  if (window.innerWidth < 600) {
+    btn2.disabled = true;
+    btn2.style.opacity = '0.35';
+    btn2.style.cursor = 'not-allowed';
+    btn2.querySelector('div:last-child').textContent = 'Desktop only';
+    btn2.onclick = null;
   }
   showModeSelect();
   document.addEventListener('keydown', handleKey);
