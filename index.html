@@ -1335,6 +1335,7 @@
     <div class="snake-msg" id="snakeMsg"></div>
     <div style="display:flex;gap:16px;">
       <button class="snake-close" onclick="backToMenu()">← Mode Select</button>
+      <button class="snake-close" id="snakeRestartBtn" style="display:none;" onclick="resetGame();drawFrame();">↺ Restart</button>
       <button class="snake-close" onclick="closeSnake()">✕ Close</button>
     </div>
   </div>
@@ -1423,6 +1424,8 @@ function resetGame() {
 
   winner = null;
   state = 'waiting';
+  const rb = document.getElementById('snakeRestartBtn');
+  if(rb) rb.style.display = 'none';
   document.getElementById('snakeMsg').textContent = mode === 1
     ? 'Press WASD or Arrow Keys to start'
     : 'P1: WASD  ·  P2: Arrow Keys  ·  Press any key to start';
@@ -1488,6 +1491,7 @@ function tick() {
 function die() {
   clearInterval(loop); state='dead';
   drawFrame();
+  document.getElementById('snakeRestartBtn').style.display = 'inline';
   let msg = '';
   if (mode === 1) {
     msg = 'Game over — Score: ' + score1 + '  ·  R to restart';
